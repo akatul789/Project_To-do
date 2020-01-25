@@ -18,8 +18,6 @@ const sequelize = new Sequelize({
     dialect: "postgres"
 });
 
-///-------------
-
 sequelize.authenticate()
 .then( ()=> {
     console.log("Database Connected");
@@ -28,7 +26,7 @@ sequelize.authenticate()
 });
 
 
-///// ---------
+///// ----------------
 const User = sequelize.define('user',{
 
     user_id: {
@@ -65,19 +63,12 @@ const to_do = sequelize.define('to_do',
     description: Sequelize.STRING,
     user_id: {
     type: Sequelize.INTEGER,
-    allowNull: false,
-       references: {
-          model: 'users',
-          key: 'user_id', 
-       }
-    },
-    
+    allowNull: false
+    }
     
     },{
         timestamps: false
 });
-
-User.hasMany(to_do); /// one to many rel.
 
 //---------------------
 
@@ -93,20 +84,14 @@ const Login = sequelize.define('login',
 	password: Sequelize.STRING,
 	email: {
         type: Sequelize.STRING,
-    	//allowNull: false,
-        references: {
-          model: 'users',
-          key: 'email', 
-       }
-    },
-    
-    
+    	allowNull: false,
+    }
     },{
         timestamps: false
 });
 
-//User.belongsTo(Login);
-
+User.belongsTo(Login);
+User.hasMany(to_do); /// one to many rel.
 //------------
  sequelize.sync({
      force: true
