@@ -303,82 +303,39 @@ app.get('/get/edit_todo', async (req,res) => {
 
 })
 
+//------------------------ Deleted todos Dashboard api----------------------
+app.get('/get/deleted_dashboard', async (req,res) => {
 
-//~ app.get('/get/user', async (req,res) => {
+    var uid = req.query.userid;
 
-    //~ var user_id = req.query.userid;
+    try{
 
-    //~ try{
+        var todos = await To_do.findAll({
+            where: {
+                user_id: uid,
+                deleted: true
+            }
+        });
 
-        //~ var user_data = await User.findOne({
-            //~ where: {
-                //~ uid: user_id
-            //~ }
-        //~ });
+        if(todos)
+        {
+            res.status(200).json({
+                todo : todos
+            });
+            return;
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({
+            message: "error while getting data from table"
+        });
+        return;
+    }
 
-        //~ if(user_data)
-        //~ {
-            //~ res.status(200).json({
-                //~ user: user_data
-            //~ });
-            //~ return;
-        //~ }
-
-        //~ // findOne  --> {}
-        //~ // findAll -- >  [ {} , {} , {}]
-
-
-    //~ }
-    //~ catch(err){
-        //~ console.log(err);
-        //~ res.status(500).json({
-            //~ message: "error while getting data from table"
-        //~ });
-        //~ return;
-    //~ }
-
-//~ })
+})
 
 
-//~ app.post('/create/user', async (req,res) => {
-
-    //~ var email = req.body.emailid;
-    //~ var username = req.body.username;
-
-    //~ var newUser = {
-        //~ mailid: email,
-        //~ username: username
-    //~ }
-
-   //~ try{
-       
-        //~ var user_created = await User.create(newUser);
-
-        //~ console.log(user_created);
-        
-        //~ if(user_created)
-        //~ {
-            //~ res.status(200).json({
-                //~ message: "User created successfully"
-            //~ });
-            //~ return;
-        //~ }
-   //~ }
-   //~ catch(err){
-    //~ console.log(err);
-    //~ res.status(500).json({
-        //~ message: "User not created",
-        //~ error: err
-    //~ });
-    //~ return;
-   //~ }
-
-//~ })
-
-
-
-// get
-// post
 
 app.listen(port, () => {
     console.log("Server started on port ${port}");
