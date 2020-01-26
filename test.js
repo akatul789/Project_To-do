@@ -26,7 +26,7 @@ sequelize.authenticate()
 });
 
 
-///// ----------------
+///// User table----------------
 const User = sequelize.define('userdata',{
 
     user_id: {
@@ -49,7 +49,7 @@ const User = sequelize.define('userdata',{
     },{
         timestamps: false
 });
-//---------------------
+//  To-do table---------------------
 const To_do = sequelize.define('to_do',
 {
 
@@ -78,7 +78,7 @@ const To_do = sequelize.define('to_do',
         timestamps: false
 });
 
-//---------------------
+// Login Table---------------------
 
 const Login = sequelize.define('login',
 {
@@ -98,16 +98,20 @@ const Login = sequelize.define('login',
         timestamps: false
 });
 
-Login.belongsTo(User,{foreignKey: 'email', targetKey: 'uemail'});
+Login.belongsTo(User,{foreignKey: 'email', targetKey: 'uemail'}); // 1-1 rel. from login to user
 User.hasMany(To_do,{foreignKey:'user_id'}); /// one to many rel.
-//---------------
 
+//===================
 
  //~ sequelize.sync({
      //~ force: true
  //~ });
  
- //-------test
+//========================= 
+ 
+ 
+//-------testing api
+
 app.get('/' ,  (req,res) => {
 
     res.status(200).json({
@@ -118,7 +122,8 @@ app.get('/' ,  (req,res) => {
 
 });
 
-//---- Create user api --
+
+//--------------- Create user api -----------------------
 
 app.post('/create/user', async (req,res) => {
 
@@ -155,7 +160,7 @@ app.post('/create/user', async (req,res) => {
 
 })
 
-//---- Create TO-do api --
+//---------------------- Create TO-do api --------------------
 
 app.post('/create/todo', async (req,res) => {
 
@@ -194,7 +199,7 @@ app.post('/create/todo', async (req,res) => {
 
 })
 
-//------ Dashboard api----
+//------------------------ Dashboard api----------------------
 app.get('/get/dashboard', async (req,res) => {
 
     var uid = req.query.userid;
@@ -225,7 +230,7 @@ app.get('/get/dashboard', async (req,res) => {
 
 })
 
-//------ Delete todo api----
+//------------------------ Delete todo api----------------------
 app.get('/get/delete_todo', async (req,res) => {
 
     var tid1 = req.query.todoid;
@@ -257,7 +262,7 @@ app.get('/get/delete_todo', async (req,res) => {
 
 })
 
-//----------Edit todo api-----
+//-----------------------Edit todo api-----------------------
 
 app.get('/get/edit_todo', async (req,res) => {
 	
