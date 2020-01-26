@@ -335,7 +335,36 @@ app.get('/get/deleted_dashboard', async (req,res) => {
 
 })
 
+//------------------------ Profile details api----------------------
+app.get('/get/profile_details', async (req,res) => {
 
+    var uid = req.query.userid;
+
+    try{
+
+        var user = await User.findOne({
+            where: {
+                user_id: uid
+            }
+        });
+
+        if(user)
+        {
+            res.status(200).json({
+                user_details : user
+            });
+            return;
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({
+            message: "error while getting data from table"
+        });
+        return;
+    }
+
+})
 
 app.listen(port, () => {
     console.log("Server started on port ${port}");
