@@ -167,7 +167,7 @@ app.get('/' ,  (req,res) => {
 
 //--------------- Create user api -----------------------
 
-app.post('/create/user', async (req,res) => {
+app.post('/create/user',authHandler, async (req,res) => {
 
     var emailz = req.body.emailid;
     var username = req.body.username;
@@ -212,7 +212,7 @@ app.post('/create/user', async (req,res) => {
 
 //---------------------- Create TO-do api --------------------
 
-app.post('/create/todo', async (req,res) => {
+app.post('/create/todo',authHandler, async (req,res) => {
 
     var tit = req.body.title;
     var des = req.body.des;
@@ -250,7 +250,7 @@ app.post('/create/todo', async (req,res) => {
 })
 
 //------------------------ Dashboard api----------------------
-app.get('/get/dashboard', async (req,res) => {
+app.get('/get/dashboard',authHandler, async (req,res) => {
 
     var uid = req.query.userid;
 
@@ -281,7 +281,7 @@ app.get('/get/dashboard', async (req,res) => {
 })
 
 //------------------------ Delete todo api----------------------
-app.get('/get/delete_todo', async (req,res) => {
+app.get('/get/delete_todo',authHandler, async (req,res) => {
 
     var tid1 = req.query.todoid;
 
@@ -314,7 +314,7 @@ app.get('/get/delete_todo', async (req,res) => {
 
 //-----------------------Edit todo api-----------------------
 
-app.get('/get/edit_todo', async (req,res) => {
+app.get('/get/edit_todo',authHandler, async (req,res) => {
 	
     var tid1 = req.query.todoid;
     var tit = req.query.title;
@@ -354,7 +354,7 @@ app.get('/get/edit_todo', async (req,res) => {
 })
 
 //------------------------ Deleted todos Dashboard api----------------------
-app.get('/get/deleted_dashboard', async (req,res) => {
+app.get('/get/deleted_dashboard',authHandler, async (req,res) => {
 
     var uid = req.query.userid;
 
@@ -386,7 +386,7 @@ app.get('/get/deleted_dashboard', async (req,res) => {
 })
 
 //------------------------ Profile details api----------------------
-app.get('/get/profile_details', async (req,res) => {
+app.get('/get/profile_details',authHandler, async (req,res) => {
 
     var uid = req.query.userid;
 
@@ -421,8 +421,8 @@ app.get('/get/profile_details', async (req,res) => {
 
 app.post('/login', async function(req,res) {
 
-		var emailz = req.body.emailid;
-		var pass = req.body.password;
+	var emailz = req.body.emailid;
+	var pass = req.body.password;
     try{
 
         var login_det = await Login.findOne({
@@ -434,7 +434,7 @@ app.post('/login', async function(req,res) {
 		console.log(login_det);
         if(login_det)
         {
-            var token = jwt.sign(login_det.dataValues, 'shhhh', { algorithm: 'RS256'});
+            var token = jwt.sign(login_det.dataValues, 'shhhh');
             res.status(200).json({
                 success: true,
                 token: token
