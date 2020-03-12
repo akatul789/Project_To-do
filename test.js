@@ -1,6 +1,8 @@
 const express = require('express');
 const Sequelize = require('sequelize');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+
 
 const app = express();
 
@@ -25,7 +27,7 @@ sequelize.authenticate()
     console.error('unable to connect to Database');
 });
 
-
+// 		## Creating Tables--
 ///// User table----------------
 const User = sequelize.define('userdata',{
 
@@ -89,16 +91,19 @@ const Login = sequelize.define('login',
         primaryKey: true,
         autoIncrement: true
     },
-	password: Sequelize.STRING,
-	email: {
+    email: {
         type: Sequelize.STRING,
     	allowNull: false,
-    }
+    },
+	password: Sequelize.STRING
     },{
         timestamps: false
 });
 
-Login.belongsTo(User,{foreignKey: 'email', targetKey: 'uemail'}); // 1-1 rel. from login to user
+Login.belongsTo(User, { onDelete: 'cascade', foreignKey: 'email', targetKey: 'uemail'}); // 1-1 rel. from login to user
+
+//~ { onDelete: 'cascade', foreignKey: { allowNull: false }  hooks: true});
+
 User.hasMany(To_do,{foreignKey:'user_id'}); /// one to many rel.
 
 //===================
@@ -108,6 +113,43 @@ User.hasMany(To_do,{foreignKey:'user_id'}); /// one to many rel.
  //~ });
  
 //========================= 
+ 
+ 
+//======
+// authHandler function---
+
+var authHandler = function (req, res, next) {
+    
+    if(!req.get("X-AUTH-TOKEN"))
+    {
+        res.status(500).json({
+            success: false,
+            error: {
+                message: "token not passed"
+            }
+        });
+        return;
+    }
+
+    try{
+        var token = req.get("X-AUTH-TOKEN");
+
+        var user_credentials = jwt.verify(token, 'shhhhh');
+
+    }
+    catch(err){
+        console.log(err);
+        res.status(401).json({
+            success: false,
+            error: {
+                message: "Invalid Token"
+            }
+        });
+        return;
+    }
+    next();
+}
+
  
  
 //-------testing api
@@ -127,18 +169,26 @@ app.get('/' ,  (req,res) => {
 
 app.post('/create/user', async (req,res) => {
 
-    var email = req.body.emailid;
+    var emailz = req.body.emailid;
     var username = req.body.username;
-
+	var pass=req.body.password;
+	
     var newUser = {
         uname: username,
-        uemail: email
+        uemail: emailz
+    }
+    
+	var logindet = {
+        email: emailz,
+        password: pass
     }
 
    try{
        
         var user_created = await User.create(newUser);
-
+        
+        var login=await Login.create(logindet);
+		
         console.log(user_created);
         
         if(user_created)
@@ -366,7 +416,52 @@ app.get('/get/profile_details', async (req,res) => {
 
 })
 
+
+//----------------------Login Api---------------------
+
+app.post('/login', async function(req,res) {
+
+		var emailz = req.body.emailid;
+		var pass = req.body.password;
+    try{
+
+        var login_det = await Login.findOne({
+            where: {
+                email: emailz,
+                password:pass
+            }
+        });
+		console.log(login_det);
+        if(login_det)
+        {
+            var token = jwt.sign(login_det.dataValues, 'shhhh', { algorithm: 'RS256'});
+            res.status(200).json({
+                success: true,
+                token: token
+            });
+            return;
+        }
+        else{
+            res.status(500).json({
+                success: false,
+                error: `Cannot find your account`
+            });
+            return;
+        }
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({
+            success: false,
+            error: `internal server ERROR: ${err.message} `
+        });
+        return;
+    }
+
+})
+
 app.listen(port, () => {
-    console.log("Server started on port ${port}");
+    console.log(`Server started on port ${port}`);
 });
 
