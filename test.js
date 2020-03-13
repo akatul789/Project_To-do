@@ -95,7 +95,7 @@ const Login = sequelize.define('login',
         type: Sequelize.STRING,
     	allowNull: false,
     },
-	password: Sequelize.STRING
+	// password: Sequelize.STRING
     },{
         timestamps: false
 });
@@ -163,58 +163,6 @@ app.get('/' ,  (req,res) => {
     return;
 
 });
-
-
-//--------------- Create user api -----------------------
-
-app.post('/create/user',authHandler, async (req,res) => {
-
-    var emailz = req.body.emailid;
-    var username = req.body.username;
-	var pass=req.body.password;
-	
-    var newUser = {
-        uname: username,
-        uemail: emailz
-    }
-    
-	var logindet = {
-        email: emailz,
-        password: pass
-    }
-
-   try{
-
-        const t1 = await sequelize.transaction();
-       
-        var user_created = await User.create(newUser, { transaction: t1 });
-        
-        var login=await Login.create(logindet, { transaction: t1 });
-		
-        console.log(user_created);
-        
-        if(user_created)
-        {
-            await t1.commit();
-            res.status(200).json({
-                message: "User created successfully !!"
-            });
-            return;
-        }
-        else{
-            await t1.rollback();
-        }
-   }
-   catch(err){
-    console.log(err);
-    await t1.rollback();
-    res.status(500).json({
-        message: "User not created !!",
-        error: err
-    });
-    return;
-   }
-})
 
 //---------------------- Create TO-do api --------------------
 
@@ -427,17 +375,32 @@ app.get('/get/profile_details',authHandler, async (req,res) => {
 
 app.post('/login', async function(req,res) {
 
-	var emailz = req.body.emailid;
-	var pass = req.body.password;
+    if(!req.body.idtoken)
+    {
+        res.status(500).json({
+            message: "id token is required",
+            error: err
+        });
+        return;
+    }
+
     try{
+
+        var newUser = {
+            uname: req.body.idtoken.name,
+            uemail: req.body.idtoken.email
+        }
+        
+        var logindet = {
+            email: req.body.idtoken.email
+        }
 
         var login_det = await Login.findOne({
             where: {
-                email: emailz,
-                password:pass
+                email: email
             }
         });
-		console.log(login_det);
+
         if(login_det)
         {
             var token = jwt.sign(login_det.dataValues, 'shhhh');
@@ -448,6 +411,36 @@ app.post('/login', async function(req,res) {
             return;
         }
         else{
+
+            const t1 = await sequelize.transaction();
+       
+            var user_created = await User.create(newUser, { transaction: t1 });
+            
+            var login = await Login.create(logindet, { transaction: t1 });
+            
+            console.log(user_created);
+            
+            if(user_created)
+            {
+                await t1.commit();
+
+                var login_det = await Login.findOne({
+                    where: {
+                        email: email
+                    }
+                });
+                        
+                var token = jwt.sign(login_det.dataValues, 'shhhh');
+                res.status(200).json({
+                    success: true,
+                    token: token
+                });
+                return;
+            }
+            else{
+                await t1.rollback();
+            }
+
             res.status(500).json({
                 success: false,
                 error: `Cannot find your account`
@@ -457,6 +450,7 @@ app.post('/login', async function(req,res) {
     }
     catch(err)
     {
+        await t1.rollback();
         console.log(err);
         res.status(500).json({
             success: false,
@@ -464,10 +458,65 @@ app.post('/login', async function(req,res) {
         });
         return;
     }
+});
 
-})
+//--------------- Create user api -----------------------
+
+// app.post('/create/user',authHandler, async (req,res) => {
+    
+//     if(!req.body.idtoken)
+//     {
+//         res.status(500).json({
+//             message: "id token is required",
+//             error: err
+//         });
+//         return;
+//     }
+    
+//     var newUser = {
+//         uname: req.body.idtoken.name,
+//         uemail: req.body.idtoken.email
+//     }
+    
+// 	var logindet = {
+//         email: req.body.idtoken.email
+//     }
+
+//    try{
+
+//         const t1 = await sequelize.transaction();
+       
+//         var user_created = await User.create(newUser, { transaction: t1 });
+        
+//         var login=await Login.create(logindet, { transaction: t1 });
+		
+//         console.log(user_created);
+        
+//         if(user_created)
+//         {
+//             await t1.commit();
+//             res.status(200).json({
+//                 message: "User created successfully !!"
+//             });
+//             return;
+//         }
+//         else{
+//             await t1.rollback();
+//         }
+//    }
+//    catch(err){
+//     console.log(err);
+//     await t1.rollback();
+//     res.status(500).json({
+//         message: "User not created !!",
+//         error: err
+//     });
+//     return;
+//    }
+// })
+
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
-
