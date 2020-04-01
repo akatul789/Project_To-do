@@ -10,15 +10,42 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
-const port = 3100;
+const port = 8000;
 
-const sequelize = new Sequelize({
-	username: "postgres",
-    password: 'Admin@123',
-	database: "todo",
+
+//=====================================================
+// Server Database Config
+
+// const sequelize = new Sequelize({
+//     username: "postgres",
+//     password: 'Admin123',
+//     database: "todo",
+//     host: "localhost",
+//     dialect: "postgres"
+// });
+
+// Surya Database Config
+
+// const sequelize = new Sequelize({
+// 	username: "postgres",
+//     password: 'surya@1999',
+// 	database: "surya",
+//     host: "localhost",
+//     dialect: "postgres"
+// });
+
+// Atul Database Config
+
+  const sequelize = new Sequelize({
+ 	 username: "aks1",
+    password: 'aks101',
+ 	  database: "todo",
     host: "localhost",
     dialect: "postgres"
-});
+ });
+
+//======================================================
+
 
 sequelize.authenticate()
 .then( ()=> {
