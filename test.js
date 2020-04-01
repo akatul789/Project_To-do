@@ -2,27 +2,43 @@ const express = require('express');
 const Sequelize = require('sequelize');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-
+const cors = require('cors');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(cors());
+app.options('*', cors());
 
-const port = 8000;
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept"); // cors header
+    if(req.method == "OPTIONS"){
+            // In very simple terms, this is how you handle OPTIONS request in nodejs
+            res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE, HEAD");
+            res.header('Access-Control-Max-Age', '1728000');
+            res.header('Access-Control-Allow-Credentials', 'true');
+            res.header("Access-Control-Allow-Headers", "Origin,Content-Type,Accept,Authorization, X-AUTH-TOKEN");
+            res.header("Content-Length", "0");
+            res.sendStatus(208);
+    }
+    else{
+        next();
+    }
+});
 
 //=====================================================
 // Server Database Config
 
-// const sequelize = new Sequelize({
-//     username: "postgres",
-//     password: 'Admin123',
-//     database: "todo",
-//     host: "localhost",
-//     dialect: "postgres"
-// });
+const sequelize = new Sequelize({
+    username: "postgres",
+    password: 'Admin123',
+    database: "todo",
+    host: "localhost",
+    dialect: "postgres"
+});
 
 // Surya Database Config
 
@@ -36,23 +52,24 @@ const port = 8000;
 
 // Atul Database Config
 
-  const sequelize = new Sequelize({
- 	 username: "aks1",
-    password: 'aks101',
- 	  database: "todo",
-    host: "localhost",
-    dialect: "postgres"
- });
+//  const sequelize = new Sequelize({
+// 	 username: "aks1",
+//    password: 'aks101',
+// 	  database: "todo",
+//    host: "localhost",
+//    dialect: "postgres"
+// ~ });
 
 //======================================================
 
+const port = 8000;
 
 sequelize.authenticate()
-.then( ()=> {
-    console.log("Database Connected");
-}).catch( err => {
-    console.error('unable to connect to Database');
-});
+    .then(() => {
+        console.log("Database Connected");
+    }).catch(err => {
+        console.error('unable to connect to Database');
+    });
 
 // 		## Creating Tables--
 ///// User table----------------
