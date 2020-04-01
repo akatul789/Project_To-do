@@ -1,0 +1,28 @@
+{
+  "name": "project_to-do",
+  "version": "1.0.0",
+  "description": "Todo Project backend- fountane",
+  "main": "test.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.0.0",
+    "sequelize": "^5.21.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://akatul789@github.com/akatul789/Project_To-do.git"
+  },
+  "author": "Atul kumar singh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akatul789/Project_To-do/issues"
+  },
+  "homepage": "https://github.com/akatul789/Project_To-do#readme"
+}
