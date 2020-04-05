@@ -32,13 +32,13 @@ app.use(function(req, res, next) {
 //=====================================================
 // Server Database Config
 
-const sequelize = new Sequelize({
-    username: "postgres",
-    password: 'Admin123',
-    database: "todo",
-    host: "localhost",
-    dialect: "postgres"
-});
+//const sequelize = new Sequelize({
+//    username: "postgres",
+//    password: 'Admin123',
+//    database: "todo",
+//    host: "localhost",
+//    dialect: "postgres"
+//});
 
 // Surya Database Config
 
@@ -52,13 +52,13 @@ const sequelize = new Sequelize({
 
 // Atul Database Config
 
-//  const sequelize = new Sequelize({
-// 	 username: "aks1",
-//    password: 'aks101',
-// 	  database: "todo",
-//    host: "localhost",
-//    dialect: "postgres"
-// ~ });
+ const sequelize = new Sequelize({
+	 username: "aks1",
+	 password: 'aks101',
+	 database: "todo",
+	 host: "localhost",
+	 dialect: "postgres"
+ });
 
 //======================================================
 
@@ -71,9 +71,11 @@ sequelize.authenticate()
         console.error('unable to connect to Database');
     });
 
-// 		## Creating Tables--
-///// User table----------------
-const User = sequelize.define('userdata',{
+// !!-Creating Tables
+
+// User table-----------------------------
+
+const User = sequelize.define('userdata', {
 
     user_id: {
         type: Sequelize.INTEGER,
@@ -86,86 +88,81 @@ const User = sequelize.define('userdata',{
     uemail: {
         type: Sequelize.STRING,
         unique: true,
-            validate: {
-                isEmail: true
-            }
-            },
+        validate: {
+            isEmail: true
+        }
+    },
     prof_pic: Sequelize.STRING
-    
-    },{
-        timestamps: false
-});
-//  To-do table---------------------
-const To_do = sequelize.define('to_do',
-{
 
-    tid: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
+}, {
+    timestamps: false
+});
+
+//  To-do table-----------------------
+
+const To_do = sequelize.define('to_do',
+    {
+
+        tid: {
+            type: Sequelize.BIGINT,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        title: Sequelize.STRING,
+        description: Sequelize.STRING,
+        status: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
+        deleted: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        }
     },
-    title: Sequelize.STRING,
-    description: Sequelize.STRING,
-    //~ user_id: {
-    //~ type: Sequelize.INTEGER,
-    //~ allowNull: false
-    //~ },
-	status : {
-	type: Sequelize.BOOLEAN,
-	defaultValue: false
-    },
-    deleted: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-    }
-},
     {
         timestamps: false
-});
+    });
 
 // Login Table---------------------
 
 const Login = sequelize.define('login',
-{
+    {
 
-    log_id: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    email: {
-        type: Sequelize.STRING,
-    	allowNull: false,
-    },
-	// password: Sequelize.STRING
-    },{
-        timestamps: false
+        log_id: {
+            type: Sequelize.BIGINT,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        email: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        }
+    }, {
+    timestamps: false
 });
 
-Login.belongsTo(User, { onDelete: 'cascade', foreignKey: 'email', targetKey: 'uemail'}); // 1-1 rel. from login to user
+// !!-Relations
 
-//~ { onDelete: 'cascade', foreignKey: { allowNull: false }  hooks: true});
+Login.belongsTo(User, { onDelete: 'cascade', foreignKey: 'email', targetKey: 'uemail' });
+User.hasMany(To_do, { foreignKey: 'user_id' });
 
-User.hasMany(To_do,{foreignKey:'user_id'}); /// one to many rel.
 
-//===================
+//=============================
 
- //~ sequelize.sync({
-     //~ force: true
- //~ });
- 
-//========================= 
- 
- 
-//======
-// authHandler function---
+//  sequelize.sync({
+//     force: true
+//  });
+
+//=============================
+
+
+// !!--------------authHandler Middleware function----------------------
 
 var authHandler = function (req, res, next) {
-    
-    if(!req.get("X-AUTH-TOKEN"))
-    {
+
+    if (!req.get("X-AUTH-TOKEN")) {
         res.status(500).json({
             success: false,
             error: {
@@ -175,13 +172,14 @@ var authHandler = function (req, res, next) {
         return;
     }
 
-    try{
+    try {
         var token = req.get("X-AUTH-TOKEN");
 
         var user_credentials = jwt.verify(token, 'shhhhh');
+        req.token = user_credentials
 
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         res.status(401).json({
             success: false,
