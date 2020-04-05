@@ -194,9 +194,9 @@ var authHandler = function (req, res, next) {
 
  
  
-//-------testing api
+//--------------Testing api-------------
 
-app.get('/' ,  (req,res) => {
+app.get('/', (req, res) => {
 
     res.status(200).json({
         success: true,
@@ -205,6 +205,28 @@ app.get('/' ,  (req,res) => {
     return;
 
 });
+
+//------------------------Testing Get req. api----------------------
+
+app.get('/get/test',async (req, res) => {
+
+	var tid=req.query.testid;
+    var tn=req.query.testname;
+
+  console.log("Testing Get req. api called \n");
+  console.log(tid);
+  console.log(tn);
+
+	res.status(200).json({
+		testid: tid,
+		testname:tn,
+		message: "Your entered response should come here.!"
+		
+	});
+	return;
+
+});
+
 
 //---------------------- Create TO-do api --------------------
 
@@ -502,63 +524,108 @@ app.post('/login', async function(req,res) {
     }
 });
 
-//--------------- Create user api -----------------------
+//----------------------Login Api---------------------
 
-// app.post('/create/user',authHandler, async (req,res) => {
-    
-//     if(!req.body.idtoken)
-//     {
-//         res.status(500).json({
-//             message: "id token is required",
-//             error: err
-//         });
-//         return;
-//     }
-    
-//     var newUser = {
-//         uname: req.body.idtoken.name,
-//         uemail: req.body.idtoken.email
-//     }
-    
-// 	var logindet = {
-//         email: req.body.idtoken.email
-//     }
+app.post('/login', async function (req, res) {
 
-//    try{
+	console.log("## Login Api called\n");
+	
+    if (!req.body.googleRes) {
+        res.status(500).json({
+            message: "googleRes is required"
+        });
+        return;
+    }
 
-//         const t1 = await sequelize.transaction();
-       
-//         var user_created = await User.create(newUser, { transaction: t1 });
-        
-//         var login=await Login.create(logindet, { transaction: t1 });
-		
-//         console.log(user_created);
-        
-//         if(user_created)
-//         {
-//             await t1.commit();
-//             res.status(200).json({
-//                 message: "User created successfully !!"
-//             });
-//             return;
-//         }
-//         else{
-//             await t1.rollback();
-//         }
-//    }
-//    catch(err){
-//     console.log(err);
-//     await t1.rollback();
-//     res.status(500).json({
-//         message: "User not created !!",
-//         error: err
-//     });
-//     return;
-//    }
-// })
+    try {
+
+        // console.log(req.body);
+
+        var newUser = {
+            uname: req.body.googleRes.name,
+            uemail: req.body.googleRes.email
+        }
+
+        var logindet = {
+            email: req.body.googleRes.email
+        }
+
+        var login_det = await Login.findOne({
+            where: {
+                email: logindet.email
+            }
+        });
+
+        if (login_det) {
+
+            var userdata = await User.findOne({
+                where: {
+                    uemail: login_det.dataValues.email
+                }
+            });
+            var token = jwt.sign(userdata.dataValues, 'shhhhh');
+
+            console.log("===== TOKEN =====");
+            console.log(token);
+            console.log("===== TOKEN =====");
+            
+            res.status(200).json({
+                success: true,
+                token: token
+            });
+            return;
+        }
+        else {
+
+            const t1 = await sequelize.transaction();
+
+            var user_created = await User.create(newUser, { transaction: t1 });
+
+            var login = await Login.create(logindet, { transaction: t1 });
+
+            // console.log(user_created);
+
+            if (user_created) {
+                await t1.commit();
+
+                var login_det = await Login.findOne({
+                    where: {
+                        email: logindet.email
+                    }
+                });
+
+                var token = jwt.sign(login_det.dataValues, 'shhhhh');
+
+                console.log("===== TOKEN =====");
+                console.log(token);
+                console.log("===== TOKEN =====");
+                
+                res.status(200).json({
+                    success: true,
+                    token: token,
+                });
+                return;
+            }
+            else {
+                await t1.rollback();
+            }
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            success: false,
+            error: `internal server ERROR: ${err.message} `
+        });
+        return;
+    }
+});
 
 
+//=============================EOAPI====================================
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
+
+//===============================EOF====================================
