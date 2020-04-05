@@ -230,42 +230,45 @@ app.get('/get/test',async (req, res) => {
 
 //---------------------- Create TO-do api --------------------
 
-app.post('/create/todo',authHandler, async (req,res) => {
+app.post('/create/todo', authHandler, async (req, res) => {
 
-    var tit = req.body.title;
-    var des = req.body.des;
-    var uid = req.body.userid;
+    console.log("## Create todo Api called\n");
 
     var newtodo = {
-		title: tit,
-		description: des,
-		user_id:uid
+        title: req.body.title,
+        description: req.body.des,
+        user_id:req.token.user_id
+        //~ user_id: req.body.user_id ///remove later------------------debug code
     }
 
-   try{
-       
+    console.log(req.token);
+    console.log("===========");
+    console.log(newtodo);
+
+    try {
+
         var todo_created = await To_do.create(newtodo);
 
         console.log(todo_created);
-        
-        if(todo_created)
-        {
+
+        if (todo_created) {
             res.status(200).json({
                 message: "TO-Do created successfully !!"
             });
             return;
         }
-   }
-   catch(err){
-    console.log(err);
-    res.status(500).json({
-        message: "TO-Do not created !!",
-        error: err
-    });
-    return;
-   }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: "TO-Do not created !!",
+            error: err
+        });
+        return;
+    }
 
 })
+
 
 //------------------------ Dashboard api----------------------
 app.get('/get/dashboard',authHandler, async (req,res) => {
