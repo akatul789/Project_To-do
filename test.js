@@ -302,28 +302,61 @@ app.get('/get/dashboard',authHandler, async (req,res) => {
 })
 
 //------------------------ Delete todo api----------------------
-app.get('/get/delete_todo',authHandler, async (req,res) => {
+app.get('/get/delete_todo', authHandler, async (req, res) => {
 
-    var tid1 = req.query.todoid;
 
-    try{
+	console.log("## Delete todo Api called\n");
+    try {
 
-        var todos = await To_do.update(
+		var del=req.query.permanent;
+		var tid=req.query.todoid;
+
+		if (!tid || !del) {
+				res.status(200).json({
+					message: "Enter Todo ID and/or permanent value !!"
+				});
+				return;
+			}
+
+
+		if(del=="true")
+		{
+			var todos = await To_do.destroy({
+				where: {
+					tid: tid
+					}
+				});
+
+			if (todos) {
+				res.status(200).json({
+					message: "TO-Do Deleted permanently !!"
+				});
+				return;
+				}
+		}
+		else
+		{
+			var todos = await To_do.update(
+				{
+					deleted: true
+				},
+				{
+					where:
 					{
-					  deleted:true
-					},
-					{ where: { tid: tid1 } }
-        );
+						tid: tid
+					}
+				});
 
-        if(todos)
-        {
-            res.status(200).json({
-                message: "TO-Do Deleted successfully !!"
-            });
-            return;
-        }
-        }
-    catch(err){
+			if (todos) {
+				res.status(200).json({
+					message: "TO-Do Deleted temporary !!"
+				});
+				return;
+			}
+		}		
+
+    }
+    catch (err) {
         console.log(err);
         res.status(500).json({
             message: "error while getting data from table"
@@ -407,27 +440,27 @@ app.get('/get/deleted_dashboard',authHandler, async (req,res) => {
 })
 
 //------------------------ Profile details api----------------------
-app.get('/get/profile_details',authHandler, async (req,res) => {
 
-    var uid = req.query.userid;
+app.get('/get/profile_details', authHandler, async (req, res) => {
 
-    try{
+	console.log("## Profile Det. Api called\n");
+
+    try {
 
         var user = await User.findOne({
             where: {
-                user_id: uid
+                user_id: req.token.user_id
             }
         });
 
-        if(user)
-        {
+        if (user) {
             res.status(200).json({
-                user_details : user
+                user_details: user.dataValues
             });
             return;
         }
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         res.status(500).json({
             message: "error while getting data from table"
@@ -436,96 +469,6 @@ app.get('/get/profile_details',authHandler, async (req,res) => {
     }
 
 })
-
-
-//----------------------Login Api---------------------
-
-app.post('/login', async function(req,res) {
-
-    if(!req.body.idtoken)
-    {
-        res.status(500).json({
-            message: "id token is required",
-            error: err
-        });
-        return;
-    }
-
-    try{
-
-        var newUser = {
-            uname: req.body.idtoken.name,
-            uemail: req.body.idtoken.email
-        }
-        
-        var logindet = {
-            email: req.body.idtoken.email
-        }
-
-        var login_det = await Login.findOne({
-            where: {
-                email: email
-            }
-        });
-
-        if(login_det)
-        {
-            var token = jwt.sign(login_det.dataValues, 'shhhh');
-            res.status(200).json({
-                success: true,
-                token: token
-            });
-            return;
-        }
-        else{
-
-            const t1 = await sequelize.transaction();
-       
-            var user_created = await User.create(newUser, { transaction: t1 });
-            
-            var login = await Login.create(logindet, { transaction: t1 });
-            
-            console.log(user_created);
-            
-            if(user_created)
-            {
-                await t1.commit();
-
-                var login_det = await Login.findOne({
-                    where: {
-                        email: email
-                    }
-                });
-                        
-                var token = jwt.sign(login_det.dataValues, 'shhhh');
-                res.status(200).json({
-                    success: true,
-                    token: token
-                });
-                return;
-            }
-            else{
-                await t1.rollback();
-            }
-
-            res.status(500).json({
-                success: false,
-                error: `Cannot find your account`
-            });
-            return;
-        }
-    }
-    catch(err)
-    {
-        await t1.rollback();
-        console.log(err);
-        res.status(500).json({
-            success: false,
-            error: `internal server ERROR: ${err.message} `
-        });
-        return;
-    }
-});
 
 //----------------------Login Api---------------------
 
