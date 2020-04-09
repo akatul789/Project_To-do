@@ -271,35 +271,124 @@ app.post('/create/todo', authHandler, async (req, res) => {
 
 
 //------------------------ Dashboard api----------------------
-app.get('/get/dashboard',authHandler, async (req,res) => {
 
-    var uid = req.query.userid;
+app.get('/get/dashboard', authHandler, async (req, res) => {
 
-    try{
+	//~ var uid= req.query.user_id; ///remove later------------------debug code
+	var uid=req.token.user_id;
+    var type=req.query.type;
+    
+    //Debug code --------
+    console.log(req.query);
+    
+	//~ res.status(200).json({
+	//~ user_id:uid,
+	//~ type:type,
+	//~ message: "Your entered response should come here.!"
+	//~ });
+	//--------------------
+	
+	if(!uid)
+		console.log("uid not passed in dashboard API\n");
+	if(!type)
+		{
+			console.log("type value not passed in dashboard API\n");
+				res.status(500).json({
+				user_id:uid,
+				type:type,
+				message: "Your entered response should come here.!"
+				});
+		}
+	
+	if(type=="normal")
+	{
+		console.log("## Dashboard Api called\n");
 
-        var todos = await To_do.findAll({
-            where: {
-                user_id: uid
-            }
-        });
+		try {
 
-        if(todos)
-        {
-            res.status(200).json({
-                todo : todos
-            });
-            return;
-        }
-    }
-    catch(err){
-        console.log(err);
-        res.status(500).json({
-            message: "error while getting data from table"
-        });
-        return;
-    }
+			var todos = await To_do.findAll({
+				where: {
+					user_id: uid,
+					deleted:false,
+					status:false
+				}
+			});
 
+			if (todos) {
+				res.status(200).json({
+					todo: todos
+				});
+				return;
+			}
+		}
+		catch (err) {
+			console.log(err);
+			res.status(500).json({
+				message: "error in dashboard"
+			});
+			return;
+		}
+	}
+	
+	else if(type=="deleted")
+	{
+		console.log("## Deleted Tasks Dashboard called\n");
+
+		try {
+
+			var todos = await To_do.findAll({
+				where: {
+					user_id: uid,
+					deleted: true
+				}
+			});
+
+			if (todos) {
+				res.status(200).json({
+					todo: todos
+				});
+				return;
+			}
+		}
+		catch (err) {
+			console.log(err);
+			res.status(500).json({
+				message: "error in deleted task dashboard"
+			});
+			return;
+		}
+	}
+	else if(type=="completed")
+	{
+		console.log("## Completed Tasks Dashboard called\n");
+
+		try {
+
+			var todos = await To_do.findAll({
+				where: {
+					user_id: uid,
+					status: true
+				}
+			});
+
+			if (todos) {
+				res.status(200).json({
+					todo: todos
+				});
+				return;
+			}
+		}
+		catch (err) {
+			console.log(err);
+			res.status(500).json({
+				message: "error in completed task dashboard"
+			});
+			return;
+		}
+	}
+		
 })
+
 
 //------------------------ Delete todo api----------------------
 app.get('/get/delete_todo', authHandler, async (req, res) => {
