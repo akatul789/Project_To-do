@@ -455,38 +455,38 @@ app.get('/get/delete_todo', authHandler, async (req, res) => {
 
 })
 
-//-----------------------Edit todo api-----------------------
+//-----------------------Update/Edit todo api-----------------------
 
-app.get('/get/edit_todo',authHandler, async (req,res) => {
-	
-    var tid1 = req.query.todoid;
-    var tit = req.query.title;
-    var des = req.query.des;
-    var comp = req.query.completed;
-    var del = req.query.deleted;
+app.post('/edit_todo', authHandler, async (req, res) => {
+
+	console.log("## Edit todo Api called\n");
 
     var newtodo = {
-		title: tit,
-		description: des,
-		status:comp,
-		deleted:del
+        title: req.body.title,
+        description: req.body.des,
+        //~ status: req.body.completed,
+        //~ deleted: req.body.deleted
     }
 
-    try{
+    try {
 
         var todos = await To_do.update(newtodo,
-					{ where: { tid: tid1 } }
+            {
+                where:
+                {
+                    tid: req.body.todoid
+                }
+            }
         );
 
-        if(todos)
-        {
+        if (todos) {
             res.status(200).json({
                 message: "TO-Do Updated successfully !!"
             });
             return;
         }
-        }
-    catch(err){
+    }
+    catch (err) {
         console.log(err);
         res.status(500).json({
             message: "error while getting data from table"
@@ -497,36 +497,36 @@ app.get('/get/edit_todo',authHandler, async (req,res) => {
 })
 
 //------------------------ Deleted todos Dashboard api----------------------
-app.get('/get/deleted_dashboard',authHandler, async (req,res) => {
 
-    var uid = req.query.userid;
+//~ app.get('/get/deleted_dashboard', authHandler, async (req, res) => {
 
-    try{
+	//~ console.log("## Deleted Dashboard Api called\n");
 
-        var todos = await To_do.findAll({
-            where: {
-                user_id: uid,
-                deleted: true
-            }
-        });
+    //~ try {
 
-        if(todos)
-        {
-            res.status(200).json({
-                todo : todos
-            });
-            return;
-        }
-    }
-    catch(err){
-        console.log(err);
-        res.status(500).json({
-            message: "error while getting data from table"
-        });
-        return;
-    }
+        //~ var todos = await To_do.findAll({
+            //~ where: {
+                //~ user_id: req.token.user_id,
+                //~ deleted: true
+            //~ }
+        //~ });
 
-})
+        //~ if (todos) {
+            //~ res.status(200).json({
+                //~ todo: todos
+            //~ });
+            //~ return;
+        //~ }
+    //~ }
+    //~ catch (err) {
+        //~ console.log(err);
+        //~ res.status(500).json({
+            //~ message: "error while getting data from table"
+        //~ });
+        //~ return;
+    //~ }
+
+//~ })
 
 //------------------------ Profile details api----------------------
 
