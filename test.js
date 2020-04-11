@@ -496,6 +496,115 @@ app.post('/edit_todo', authHandler, async (req, res) => {
 
 })
 
+//------------------------ Completed todo api(comp/delete/restore)----------------------
+
+app.get('/get/comp_todo', authHandler, async (req, res) => {
+
+	console.log("## Completed todo Api called\n");
+
+	try
+	{
+			
+	var comp=req.query.completed;
+	var restore=req.query.restore;
+	var del=req.query.deleted;
+	var tid=req.query.todoid;
+
+
+	if(!restore)
+		restore="false";
+	if(!del)
+		del="false";
+	if(!comp)
+		comp="false";
+	if(!tid)
+	{
+		console.log("todoid not entered");	
+		res.status(200).json({
+			message: "Enter Todo ID value !!"
+		});
+		return;
+	}
+		
+
+	if(comp=="true")
+	{
+        var todos = await To_do.update(
+            {
+                status: true
+            },
+            {
+                where:
+                {
+                    tid: tid
+                }
+            });
+
+        if (todos) {
+            res.status(200).json({
+                message: "TO-Do Completed successfully !!"
+            });
+            return;
+        }
+        
+	}
+	
+	if(del=="true")
+	{
+		var todos = await To_do.update(
+			{
+				deleted: true,
+				status:false
+			},
+			{
+				where:
+				{
+					tid: tid
+				}
+			});
+
+		if (todos) {
+			res.status(200).json({
+				message: "TO-Do Deleted temporary !!"
+			});
+			return;
+		}
+	}
+	
+	if(restore=="true")
+	{
+		var todos = await To_do.update(
+			{
+				deleted:false,
+				status: false
+			},
+			{
+				where:
+				{
+					tid: tid
+				}
+			});
+
+		if (todos) {
+			res.status(200).json({
+				message: "TO-Do Restored to Dashboard !!"
+			});
+			return;
+		}
+	}
+		
+	
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: "error while getting data from table"
+        });
+        return;
+    }
+
+})
+
 //------------------------ Deleted todos Dashboard api----------------------
 
 //~ app.get('/get/deleted_dashboard', authHandler, async (req, res) => {
