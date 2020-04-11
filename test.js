@@ -510,7 +510,19 @@ app.get('/get/comp_todo', authHandler, async (req, res) => {
 	var del=req.query.deleted;
 	var tid=req.query.todoid;
 
+// Debug-----------------
+	if (!tid) {
+			res.status(200).json({
+				message: "Enter Todo ID value !!"
+			});
+			return;
+		}
+		
+		console.log(comp);
+		console.log(restore);
+		console.log(del);
 
+//---------------------------
 	if(!restore)
 		restore="false";
 	if(!del)
